@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 24 14:23:49 2023
-
-@author: TURAN
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jul 23 16:53:50 2023
-
-@author: TURAN
-"""
 import time
 #import os
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
@@ -34,18 +21,20 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
     # Change the path to where chromedriver is in your home folder.
     driver = webdriver.Chrome(service=service, options=options)
     driver.set_window_size(1120, 1000)
-
+    #url = 'https://www.glassdoor.com/Job/data-scientist-jobs-SRCH_KO0,14_IP19.htm?includeNoSalaryJobs=true'
     url = f'https://www.glassdoor.com/Job/jobs.htm?sc.keyword="{keyword}"&locT=C&locId=1147401&locKeyword=San%20Francisco,%20CA&jobType=all&fromAge=-1&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0'
     driver.get(url)
     jobs = []
-    def extract_job_details(job_button):
+    def extract_job_details(job_button,county):
         job_button.click()
         time.sleep(5)
         collected_successfully = False
         check = None
-        try:
+        try: 
             check = driver.find_element(By.CSS_SELECTOR, '.css-1cci78o')            
-        except NoSuchElementException:
+            county+=1
+            print(county)
+        except:
             while not collected_successfully:
                 try:
                     company_name = driver.find_element(By.CSS_SELECTOR, '[data-test="employerName"]').text
@@ -55,17 +44,17 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
                     collected_successfully = True
                 except NoSuchElementException:
                     pass
-
+    
             try:
                 salary_estimate = driver.find_element(By.CLASS_NAME, 'css-1xe2xww.e1wijj242').text.split(':')[-1].strip()
             except NoSuchElementException:
                 salary_estimate = -1
-
+    
             try:
                 rating = driver.find_element(By.CSS_SELECTOR, '[data-test="detailRating"]').text
             except NoSuchElementException:
                 rating = -1
-
+    
             try:
                 overview = driver.find_elements(By.CLASS_NAME, 'd-flex.justify-content-start.css-rmzuhb.e1pvx6aw0')
                 info_dict = {}
@@ -76,14 +65,14 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
                         info_dict[category] = value
                     except NoSuchElementException:
                         pass
-
+    
                 size = info_dict.get("Size", -1)
                 founded = info_dict.get("Founded", -1)
                 type_of_ownership = info_dict.get("Type", -1)
                 industry = info_dict.get("Industry", -1)
                 sector = info_dict.get("Sector", -1)
                 revenue = info_dict.get("Revenue", -1)
-
+    
             except NoSuchElementException:
                 size = -1
                 founded = -1
@@ -91,7 +80,7 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
                 industry = -1
                 sector = -1
                 revenue = -1
-
+    
             if verbose:
                 print("Job Title: {}".format(job_title))
                 print("Salary Estimate: {}".format(salary_estimate))
@@ -99,11 +88,11 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
                 print("Rating: {}".format(rating))
                 print("Company Name: {}".format(company_name))
                 print("Location: {}".format(location))
-
+    
             if verbose2:
                 print("Size: {}".format(size))
                 print("Founded: {}".format(founded))
-
+    
             jobs.append({
                 "Job Title": job_title,
                 "Salary Estimate": salary_estimate,
@@ -118,7 +107,7 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
                 "Sector": sector,
                 "Revenue": revenue
             })
-            return check
+        return check
 
     while len(jobs) < num_jobs:
         try:
@@ -141,13 +130,15 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
         # Going through each job in this page
         job_buttons = driver.find_elements(By.CLASS_NAME, "react-job-listing")
         for job_button in job_buttons:
-            print("Progress: {}/{}".format(len(jobs), num_jobs))
+            print("Progress: {}/{}".format(len(jobs), num_jobs)) 
             if len(jobs) >= num_jobs:
                 break
-
-            check = extract_job_details(job_button)
-            if  check:
-                continue
+            try: 
+                check = extract_job_details(job_button,0)
+                if check != None:
+                    continue
+            except:
+                pass
                 
 
         try:
@@ -159,15 +150,7 @@ def get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=4):
             print("Scraping terminated before reaching the target number of jobs. Needed {}, got {}.".format(num_jobs, len(jobs)))
             break
 
-        try:
-            check = driver.find_element(By.CSS_SELECTOR, '.css-1cci78o').text
-            print(check)
-        except NoSuchElementException:
-            pass
-        else:
-            print("Error Loading encountered. Skipping to the next job.")
-            continue
+        
 
     driver.quit()
     return pd.DataFrame(jobs)
-
