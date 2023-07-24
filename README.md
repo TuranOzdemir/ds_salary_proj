@@ -3,6 +3,7 @@
 ## Resources :
 #### This code is based on a modified version of [Omer Sakarya]'s code.
 #### Original code: [https://github.com/arapfaik/scraping-glassdoor-selenium/tree/master]
+#### Tutorial Artical : [https://mersakarya.medium.com/selenium-tutorial-scraping-glassdoor-com-in-10-minutes-3d0915c6d905]
 #### Modified by: [Turan Özdemir]
 #### Date: [25.07.2023]
 
