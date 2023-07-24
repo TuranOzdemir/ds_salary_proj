@@ -6,7 +6,8 @@ Created on Thu Jul 20 17:08:58 2023
 """
 
 import glassdoor_scraper as gs
-#import pandas as pd
+import to_excel as ex
 
-df = gs.get_jobs("data scientist", 35, False, False, 4)
- 
+keyword = "data scientist"
+num_jobs = 3
+df = gs.get_jobs(keyword, num_jobs, verbose=False, verbose2=False, slp_time=5)
