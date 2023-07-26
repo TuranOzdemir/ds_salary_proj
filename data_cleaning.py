@@ -13,9 +13,9 @@ df = pd.read_csv('glassdoor_jobs_merged.csv')
 # SALARY PARSING:
 df['hourly'] = df['Salary Estimate'].apply(lambda x: 1 if 'per hour' in x.lower() else 0)
 
-df = df[df['Salary Estimate'] != '-1'] # 213 adet -1 çıktı :0 kalan data 587 adet
+df = df[df['Salary Estimate'] != '-1'] # 213 units -1 output :0 remaining data 587 units
 
-salary = df['Salary Estimate'].apply(lambda x: x.split('(')[0])# apply yazılan fonksiyonu df ye uygulamak için kullanılıyor
+salary = df['Salary Estimate'].apply(lambda x: x.split('(')[0])
 minus_kd = salary.apply(lambda x: x.replace('K','').replace('$', ''))
 
 min_hr = minus_kd.apply(lambda x: x.lower().replace('per hour', ''))
@@ -74,7 +74,7 @@ df['sql'] = df['Job Description'].apply(lambda x: 1 if 'sql' in x.lower() else 0
 # Tableau:
 df['Tableau'] = df['Job Description'].apply(lambda x: 1 if 'tableau' in x.lower() else 0)
 
-
+# Turn the cleaned data to a csv file
 df.to_csv('salary_data_cleaned.csv', index = False)
 
 
